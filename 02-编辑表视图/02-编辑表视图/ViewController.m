@@ -1,0 +1,131 @@
+//
+//  ViewController.m
+//  02-编辑表视图
+//
+//  Created by qingyun on 15/12/4.
+//  Copyright (c) 2015年 河南青云信息技术有限公司. All rights reserved.
+//
+
+#import "ViewController.h"
+
+@interface ViewController ()<UITableViewDataSource,UITableViewDelegate>
+@property (weak, nonatomic) IBOutlet UITableView *tableView;
+@property (nonatomic,strong) NSDictionary *dict;
+@property (nonatomic,strong) NSArray *keys;
+@end
+
+@implementation ViewController
+static NSString *QYID = @"cell";
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    [self loadDictFromFile];
+    
+    [_tableView registerClass:[UITableViewCell class] forCellReuseIdentifier:QYID];
+    
+    UIBarButtonItem *rightBarBtnItem = [[UIBarButtonItem alloc] initWithTitle:@"编辑" style:UIBarButtonItemStylePlain target:self action:@selector(editAction:)];
+    self.navigationItem.rightBarButtonItem = rightBarBtnItem;
+    // Do any additional setup after loading the view, typically from a nib.
+}
+
+-(void)editAction:(UIBarButtonItem *)item
+{
+    if ([item.title isEqualToString:@"编辑"]) {
+        item.title = @"完成";
+        [_tableView setEditing:YES animated:YES];
+    }else{
+        item.title = @"编辑";
+        [_tableView setEditing:NO animated:YES];
+    }
+}
+-(void)loadDictFromFile{
+    
+    NSString *path = [[NSBundle mainBundle] pathForResource:@"sortednames" ofType:@"plist"];
+    
+    _dict = [NSMutableDictionary dictionaryWithContentsOfFile:path];
+    //取出key
+    NSArray *array = _dict.allKeys;
+    //排序
+    _keys = [array sortedArrayUsingSelector:@selector(compare:)];
+}
+
+#pragma mark -UITableViewDataSource
+//组数
+-(NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
+{
+    return _keys.count;
+}
+
+//多少行
+-(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+{
+    NSString *key = _keys[section];
+    NSArray *array = _dict[key];
+    return array.count;
+}
+
+//行内容
+-(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:QYID forIndexPath:indexPath];
+    NSString *key = _keys[indexPath.section];
+    NSArray *array = _dict[key];
+    cell.textLabel.text = array[indexPath.row];
+    return cell;
+}
+
+//表头
+-(NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section
+{
+    return _keys[section];
+}
+
+//索引
+-(NSArray *)sectionIndexTitlesForTableView:(UITableView *)tableView
+{
+    return _keys;
+}
+
+//编辑————添加删除
+-(BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    return YES;
+}
+
+
+//设置编辑模式
+-(UITableViewCellEditingStyle)tableView:(UITableView *)tableView editingStyleForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    if (indexPath.row % 2 == 0) {
+        return UITableViewCellEditingStyleDelete;
+    }else{
+        return UITableViewCellEditingStyleInsert;
+    }
+}
+-(void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    //取出数据
+    NSString *key = _keys[indexPath.section];
+    NSMutableArray *array = _dict[key];
+    
+    if (editingStyle == UITableViewCellEditingStyleInsert) {
+        //更改数据源
+        [array insertObject:@"123" atIndex:indexPath.row + 1];
+        
+        //更改界面
+        NSIndexPath *addIndexPath = [NSIndexPath indexPathForRow:indexPath.row + 1 inSection:indexPath.section];
+        
+        [tableView insertRowsAtIndexPaths:@[addIndexPath] withRowAnimation:UITableViewRowAnimationRight];
+    }else if(editingStyle == UITableViewCellEditingStyleDelete){
+        //更新数据源
+        [array removeObjectAtIndex:indexPath.row];
+        
+        //更改界面
+        [tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationLeft];
+    }
+}
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+@end
