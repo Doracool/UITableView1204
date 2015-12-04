@@ -158,6 +158,27 @@ static NSString *QYID = @"cell";
     //插入移动的单元格数据
     [destArray insertObject:sourceString atIndex:destinationIndexPath.row];
 }
+
+#pragma mark -扩展
+-(NSArray *)tableView:(UITableView *)tableView editActionsForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    UITableViewRowAction *rowAction1 = [UITableViewRowAction rowActionWithStyle:UITableViewRowActionStyleDefault title:@"分享" handler:^(UITableViewRowAction *action, NSIndexPath *indexPath) {
+        UIActionSheet *actionSheet = [[UIActionSheet alloc] initWithTitle:@"分享" delegate:nil cancelButtonTitle:@"chat" destructiveButtonTitle:@"QQ" otherButtonTitles:@"weiO", nil];
+        [actionSheet showInView:self.view];
+    }];
+    rowAction1.backgroundColor = [UIColor orangeColor];
+    
+    UITableViewRowAction *rowAction2 = [UITableViewRowAction rowActionWithStyle:UITableViewRowActionStyleDefault title:@"删除" handler:^(UITableViewRowAction *action, NSIndexPath *indexPath) {
+        NSString *key = _keys[indexPath.section];
+        NSMutableArray *array = _dict[key];
+        
+        [array removeObjectAtIndex:indexPath.row];
+        [tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationLeft];
+    }];
+    
+    rowAction2.backgroundColor = [UIColor redColor];
+    return @[rowAction2,rowAction1];
+}
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
