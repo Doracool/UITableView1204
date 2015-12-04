@@ -123,6 +123,41 @@ static NSString *QYID = @"cell";
         [tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationLeft];
     }
 }
+
+#pragma mark - 编辑——移动
+-(BOOL)tableView:(UITableView *)tableView canMoveRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    return YES;
+}
+
+-(void)tableView:(UITableView *)tableView moveRowAtIndexPath:(NSIndexPath *)sourceIndexPath toIndexPath:(NSIndexPath *)destinationIndexPath
+{
+    //取出源单元格对应的数据
+    //取出section对应的sourceKey
+    NSString *sourceKey = _keys[sourceIndexPath.section];
+    //用sourceKey取section的所有数据sourceArray
+    NSMutableArray *sourceArray = _dict[sourceKey];
+    
+    //从sourceArray中取到当前移动单元格的内容
+    NSString *sourceString = sourceArray[sourceIndexPath.row];
+    
+    //把移动的单元格内容移除
+    [sourceArray removeObjectAtIndex:sourceIndexPath.row];
+    
+    
+    //把取到的单元格内容插入到目的indexPath
+    
+    //取出插入的数据（目标section数据）
+    
+    //目标section的destKey
+    NSString *destKey = _keys[destinationIndexPath.section];
+    
+    //用destKey取目标section数据
+    NSMutableArray *destArray = _dict[destKey];
+    
+    //插入移动的单元格数据
+    [destArray insertObject:sourceString atIndex:destinationIndexPath.row];
+}
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
